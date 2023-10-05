@@ -14,8 +14,11 @@ import (
 
 	hellopb "go-gRPC/pkg/grpc"
 
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 type myServer struct {
@@ -23,11 +26,19 @@ type myServer struct {
 }
 
 func (s *myServer) Hello(ctx context.Context, req *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
+	stat := status.New(codes.Unknown, "unknown error occurred")
+	stat, _ = stat.WithDetails(&errdetails.DebugInfo{
+		Detail: "detail reason of err",
+	})
+	err := stat.Err()
+
 	// リクエストからnameフィールドを取り出して
 	// "Hello, [名前]!"というレスポンスを返す
-	return &hellopb.HelloResponse{
-		Message: fmt.Sprintf("Hello, %s!", req.GetName()),
-	}, nil
+	// return &hellopb.HelloResponse{
+	// 	Message: fmt.Sprintf("Hello, %s!", req.GetName()),
+	// }, nil
+
+	return nil, err
 }
 
 func (s *myServer) HelloServerStream(req *hellopb.HelloRequest, stream hellopb.GreetingService_HelloServerStreamServer) error {
